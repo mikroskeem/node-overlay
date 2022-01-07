@@ -23,6 +23,7 @@ stdenv.mkDerivation rec {
 
   dontConfigure = true;
   dontBuild = true;
+  doInstallCheck = true;
 
   installPhase = ''
     runHook preInstall
@@ -35,6 +36,15 @@ stdenv.mkDerivation rec {
     cp -r share $out/share
 
     runHook postInstall
+  '';
+
+  installCheckPhase = ''
+    runHook preInstallCheck
+
+    $out/bin/node --version | grep -F "${version}"
+    $out/bin/npm --version
+
+    runHook postInstallCheck
   '';
 
   postFixup = ''
