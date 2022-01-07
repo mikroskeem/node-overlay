@@ -31,7 +31,7 @@ stdenv.mkDerivation rec {
     mkdir -p $out
 
     cp -r bin $out/bin
-    cp -r include $out/include
+    [ -d include ] && cp -r include $out/include
     cp -r lib $out/lib
     cp -r share $out/share
 
