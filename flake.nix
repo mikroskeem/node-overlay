@@ -29,7 +29,7 @@
             cleanVersion = builtins.replaceStrings [ "." ] [ "_" ] nodeVersion;
             nodeDrvName' = "${nodeDrvName}_${cleanVersion}";
           in
-          if (nodeDownloadData ? ${system}) then
+          if ((nodeDownloadData.${system} or null) != null) then
             {
               name = nodeDrvName';
               value = pkgs.callPackage ./build-node.nix {
