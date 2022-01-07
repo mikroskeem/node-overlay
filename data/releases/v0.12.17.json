@@ -1,0 +1,13 @@
+{
+  "aarch64-linux": null,
+  "x86_64-linux": {
+    "url": "https://nodejs.org/dist/v0.12.17/node-v0.12.17-linux-x64.tar.xz",
+    "sha256": "sha256-Won4vE6BlfREma/PYKUMGY+hGdwsow9Ea5bJC8Lup3k="
+  },
+  "x86_64-darwin": {
+    "url": "https://nodejs.org/dist/v0.12.17/node-v0.12.17-darwin-x64.tar.xz",
+    "sha256": "sha256-YYtD/3iKf6/NRHISE7yFoUI5C9r0Ld3+6+9MyzTKFiU="
+  },
+  "aarch64-darwin": null,
+  "release_type": "lts"
+}

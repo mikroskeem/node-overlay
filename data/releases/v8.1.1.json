@@ -1,0 +1,16 @@
+{
+  "aarch64-linux": {
+    "url": "https://nodejs.org/dist/v8.1.1/node-v8.1.1-linux-arm64.tar.xz",
+    "sha256": "sha256-OXFUP50p933bj0elTkuZQiqCIXNZl0irf82cNcjiUSQ="
+  },
+  "x86_64-linux": {
+    "url": "https://nodejs.org/dist/v8.1.1/node-v8.1.1-linux-x64.tar.xz",
+    "sha256": "sha256-anNed73SHJL+hepfn1Z9DWkw+jPg4RGUaxfNt+/vuNU="
+  },
+  "x86_64-darwin": {
+    "url": "https://nodejs.org/dist/v8.1.1/node-v8.1.1-darwin-x64.tar.xz",
+    "sha256": "sha256-MsdBgB330rOj0WuYCMGbsdHAxjnupPS6xk0RGmB69bA="
+  },
+  "aarch64-darwin": null,
+  "release_type": "lts"
+}

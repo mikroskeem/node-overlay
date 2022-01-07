@@ -1,5 +1,5 @@
 #!/usr/bin/env nix-shell
-#!nix-shell -i bash -p curl libxml2 jq
+#!nix-shell -i bash -p curl jq htmlq
 set -euo pipefail
 
 arches=(
@@ -16,28 +16,22 @@ nix_arches["darwin-x64"]="x86_64-darwin"
 nix_arches["linux-x64"]="x86_64-linux"
 
 collect_releases () {
-	url="https://nodejs.org/en/feed/releases.xml"
-	data="$(curl -s "${url}")"
+	url="https://nodejs.org/dist/"
 
-	mapfile -d $'\n' -t lines < <(xmllint --noenc --xpath "/rss/channel/item/*[self::title or self::guid]" - <<< "${data}")
+	curl -s "${url}" | htmlq --attribute href a | grep '^v.*\d/$' | sed 's#/$##' | while read -r version; do
+		major="$(sed 's/^v//' <<< "${version}" | cut -d. -f1)"
 
-	i=0
-	for (( ; i < ${#lines[@]}; )); do
-		title="${lines[i++]}"
-		guid="${lines[i++]}"
-		title="$(xmllint --xpath "string(/title)" - <<< "${title}")"
-		guid="$(xmllint --xpath "string(/guid)" - <<< "${guid}")"
-
-		version="$(sed 's#.\+/blog/release/\(v.*\)#\1#' <<< "${guid}")"
 		reltype="unknown"
-		if grep -q -F "(Current)" <<< "${title}"; then
-			reltype="current"
-		elif grep -q -F "(LTS)" <<< "${title}"; then
+
+		# Even numbered major versions are LTS - https://nodejs.org/en/about/releases/
+		if [ "$(( major % 2 ))" = "0" ]; then
 			reltype="lts"
+		elif ! [ "${major}" = "0" ]; then # != v0.x
+			reltype="current"
 		fi
 
 		echo -e "${version}\t${reltype}"
-	done | sort
+	done | sort -V
 }
 
 mapfile -d $'\n' -t releases < <(collect_releases)
@@ -50,6 +44,8 @@ for (( i=0; i < ${#releases[@]}; i++ )); do
 
 	file="data/releases/.${version}.json.tmp"
 	final_file="data/releases/${version}.json"
+
+	# uncomment if need to rebuild
 	if [ -f "${final_file}" ]; then
 		continue
 	fi
@@ -59,17 +55,41 @@ for (( i=0; i < ${#releases[@]}; i++ )); do
 	declare -A collected
 	for arch in "${arches[@]}"; do
 		nix_arch="${nix_arches[$arch]}"
-		url="https://nodejs.org/dist/${version}/node-${version}-${arch}.tar.xz"
 
-		# TODO: only >= 16.9.0 has Darwin arm64 builds
-		if curl --silent --head "${url}" --show-error --write-out "%{http_code}" | grep -q "200"; then
-			sha256="$(nix store prefetch-file --hash-type sha256 --json "${url}" | jq -r '.hash')"
-			echo "${url} => ${sha256}"
-			collected["${nix_arch}"]="$(echo -e "${url}\n${sha256}")"
-		else
-			echo "${url} => NONE"
-			collected["${nix_arch}"]="null"
+		existing_url="$(jq -r ".[\"${nix_arch}\"]" < "${final_file}")"
+		echo "existing url='${existing_url}'"
+		if [ -f "${final_file}" ] && ! [ "${existing_url}" = "null" ]; then
+			collected["${nix_arch}"]="$(jq -r ".[\"${nix_arch}\"] | \"\\(.url)\n\\(.sha256)\"" < "${final_file}")"
+			continue
 		fi
+		# TODO: only >= 16.9.0 has Darwin arm64 builds
+
+		url=""
+		for ext in xz gz; do
+			url="https://nodejs.org/dist/${version}/node-${version}-${arch}.tar.${ext}"
+			if curl --silent --head "${url}" --show-error --write-out "%{http_code}" | grep -q "200"; then
+				break
+			fi
+			url=""
+		done
+
+		sha256=""
+		result=0
+		if [ -n "${url}" ]; then
+			set +e
+			sha256="$(nix store prefetch-file --hash-type sha256 --json "${url}" | jq -r '.hash')"
+			result=$?
+			set -e
+		fi
+
+		if [ -z "${url}" ] || ! [ "${result}" -eq 0 ]; then
+			echo "(${nix_arch} ${version}) => NONE"
+			collected["${nix_arch}"]="null"
+			continue
+		fi
+
+		echo "${url} => ${sha256}"
+		collected["${nix_arch}"]="$(echo -e "${url}\n${sha256}")"
 	done
 
 	mkdir -p data/releases

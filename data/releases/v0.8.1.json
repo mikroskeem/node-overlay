@@ -1,0 +1,7 @@
+{
+  "aarch64-linux": null,
+  "x86_64-linux": null,
+  "x86_64-darwin": null,
+  "aarch64-darwin": null,
+  "release_type": "lts"
+}
