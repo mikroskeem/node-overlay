@@ -33,7 +33,8 @@
             {
               name = nodeDrvName';
               value = pkgs.callPackage ./build-node.nix {
-                inherit nodeDrvName nodeVersion nodeDownloadData;
+                inherit nodeDrvName nodeDownloadData;
+                nodeVersion = builtins.replaceStrings [ "v" ] [ "" ] nodeVersion;
               };
             }
           else null;
