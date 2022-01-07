@@ -39,7 +39,8 @@
             }
           else null;
       in
-      {
+      rec {
         packages = builtins.listToAttrs (builtins.filter (a: a != null) (map processVersion releases));
+        checks = packages;
       });
 }
