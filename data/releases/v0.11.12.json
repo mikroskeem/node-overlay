@@ -9,5 +9,6 @@
     "sha256": "sha256-ImXlp1XkQvvZIxGd9nOBa99PKikx+Tgh5sEHX9xnhFE="
   },
   "aarch64-darwin": null,
-  "release_type": "lts"
+  "release_type": "lts",
+  "broken": true
 }

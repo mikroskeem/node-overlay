@@ -58,5 +58,6 @@ stdenv.mkDerivation rec {
 
   meta = with lib; {
     supportedPlatforms = lib.attrNames nodeDownloadData;
+    broken = nodeDownloadData.broken or false;
   };
 }
