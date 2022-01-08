@@ -41,6 +41,7 @@ stdenv.mkDerivation rec {
   installCheckPhase = ''
     runHook preInstallCheck
 
+    export NPM_CONFIG_UPDATE_NOTIFIER=false
     $out/bin/node --version | grep -F "${version}"
     $out/bin/npm --version
 
