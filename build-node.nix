@@ -21,6 +21,8 @@ stdenv.mkDerivation rec {
     autoPatchelfHook
   ];
 
+  outputs = [ "out" "dev" ];
+
   dontConfigure = true;
   dontBuild = true;
   doInstallCheck = true;
@@ -28,11 +30,11 @@ stdenv.mkDerivation rec {
   installPhase = ''
     runHook preInstall
 
-    mkdir -p $out
+    mkdir -p $out $dev
 
     cp -r bin $out/bin
-    [ -d include ] && cp -r include $out/include
     cp -r lib $out/lib
+    [ -d include ] && cp -r include $dev/include
     cp -r share $out/share
 
     runHook postInstall
