@@ -115,7 +115,7 @@ done
 # Update all releases json
 relfile="data/releases/._all.json.tmp"
 relfile_final="data/releases/_all.json"
-(cd data/releases; printf "%s\n" v*.json | sed 's#\.json##g') | jq --null-input --raw-input '[inputs | select(length>0)]' > "${relfile}"
+(cd data/releases; printf "%s\n" v*.json | sed 's#\.json##g' | sort -V) | jq --null-input --raw-input '[inputs | select(length>0)]' > "${relfile}"
 mv "${relfile}" "${relfile_final}"
 
 # vim: ft=bash
