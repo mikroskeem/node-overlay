@@ -1,5 +1,4 @@
-#!/usr/bin/env nix-shell
-#!nix-shell -i bash -p curl jq htmlq
+#!/usr/bin/env bash
 set -euo pipefail
 
 arches=(
@@ -18,7 +17,7 @@ nix_arches["linux-x64"]="x86_64-linux"
 collect_releases () {
 	url="https://nodejs.org/dist/"
 
-	curl -s "${url}" | htmlq --attribute href a | grep '^v.*\d/$' | sed 's#/$##' | while read -r version; do
+	curl -s "${url}" | htmlq --attribute href a | grep '^v.*\d*/$' | sed 's#/$##' | while read -r version; do
 		major="$(sed 's/^v//' <<< "${version}" | cut -d. -f1)"
 
 		reltype="unknown"
@@ -56,7 +55,7 @@ for (( i=0; i < ${#releases[@]}; i++ )); do
 	for arch in "${arches[@]}"; do
 		nix_arch="${nix_arches[$arch]}"
 
-		existing_url="$(jq -r ".[\"${nix_arch}\"]" < "${final_file}")"
+		existing_url="$(test -f "${final_file}" && jq -r ".[\"${nix_arch}\"]" < "${final_file}" || true)"
 		echo "existing url='${existing_url}'"
 		if [ -f "${final_file}" ] && ! [ "${existing_url}" = "null" ]; then
 			collected["${nix_arch}"]="$(jq -r ".[\"${nix_arch}\"] | \"\\(.url)\n\\(.sha256)\"" < "${final_file}")"
